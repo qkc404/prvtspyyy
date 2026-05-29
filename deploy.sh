@@ -8,7 +8,7 @@ MAGENTA='\033[1;35m'; WHITE='\033[1;37m'
 loading() {
     local text="$1"
     local spin="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
-    for ((i=0; i<10; i++)); do
+    for ((i=0; i<5; i++)); do
         for ((j=0; j<${#spin}; j++)); do
             echo -ne "\r${CYAN}${spin:$j:1} ${text}...${RESET}"
             sleep 0.05
@@ -23,8 +23,8 @@ center_text() {
     local clean=$(echo -e "$text" | sed 's/\x1b\[[0-9;]*m//g')
     local len=${#clean}
     local pad=$(( (cols - len) / 2 ))
-    printf "%${pad}s" ""
-    echo -e "$text"
+    [[ $pad -lt 0 ]] && pad=0
+    printf "%${pad}s%s\n" "" "$text"
 }
 
 clear
@@ -38,17 +38,16 @@ PROJECT_ID=$(gcloud config get-value project 2>/dev/null | tr -d '[:space:]')
 center_text "${CYAN}PROJECT: ${GREEN}${PROJECT_ID}${RESET}"
 echo ""
 
-read -r -p "$(echo -e "${CYAN}  SERVICE NAME [vless]: ${RESET}")" INPUT_NAME
+read -r -p "$(echo -e "${CYAN}SERVICE NAME [vless]: ${RESET}")" INPUT_NAME
 SERVICE_NAME=${INPUT_NAME:-vless}
 
 echo ""
 center_text "${CYAN}SELECT PERFORMANCE:${RESET}"
+center_text "${YELLOW}1) 1 vCPU / 2Gi RAM${RESET}"
+center_text "${YELLOW}2) 2 vCPU / 4Gi RAM${RESET}"
+center_text "${YELLOW}3) 4 vCPU / 8Gi RAM${RESET}"
 echo ""
-center_text "${YELLOW}  1) 1 vCPU / 2Gi RAM${RESET}"
-center_text "${YELLOW}  2) 2 vCPU / 4Gi RAM${RESET}"
-center_text "${YELLOW}  3) 4 vCPU / 8Gi RAM${RESET}"
-echo ""
-read -r -p "$(echo -e "${CYAN}  CHOICE [2]: ${RESET}")" PAIR_CHOICE
+read -r -p "$(echo -e "${CYAN}CHOICE [2]: ${RESET}")" PAIR_CHOICE
 
 case "$PAIR_CHOICE" in
     1) CPU="1"; RAM="2Gi" ;;
