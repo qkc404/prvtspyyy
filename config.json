@@ -1,0 +1,45 @@
+here{
+  "log": {"loglevel": "none"},
+  "dns": {
+    "servers": ["8.8.8.8", "1.1.1.1"],
+    "queryStrategy": "UseIPv4",
+    "disableCache": false,
+    "disableFallback": false
+  },
+  "inbounds": [
+    {
+      "port": 10001,
+      "listen": "127.0.0.1",
+      "protocol": "vless",
+      "tag": "vless",
+      "settings": {
+        "clients": [{"id": "saeka"}],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {"path": "/saeka-vless"},
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tcpNoDelay": true,
+          "tcpKeepAliveInterval": 30
+        }
+      },
+      "sniffing": {"enabled": true, "destOverride": ["http", "tls"]}
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct",
+      "settings": {"domainStrategy": "UseIPv4"},
+      "streamSettings": {
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tcpNoDelay": true,
+          "tcpKeepAliveInterval": 30
+        }
+      }
+    }
+  ]
+}
