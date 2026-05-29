@@ -1,14 +1,18 @@
-here{
+{
   "log": {"loglevel": "none"},
   "dns": {
     "servers": ["8.8.8.8", "1.1.1.1"],
     "queryStrategy": "UseIPv4",
     "disableCache": false,
-    "disableFallback": false
+    "disableFallback": true,
+    "hosts": {
+      "domain:googleapis.com": "googleapis.com",
+      "domain:google.com": "google.com"
+    }
   },
   "inbounds": [
     {
-      "port": 10001,
+      "port": 10000,
       "listen": "127.0.0.1",
       "protocol": "vless",
       "tag": "vless",
@@ -32,7 +36,9 @@ here{
     {
       "protocol": "freedom",
       "tag": "direct",
-      "settings": {"domainStrategy": "UseIPv4"},
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      },
       "streamSettings": {
         "sockopt": {
           "tcpFastOpen": true,
@@ -41,5 +47,15 @@ here{
         }
       }
     }
-  ]
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": ["vless"],
+        "outboundTag": "direct"
+      }
+    ]
+  }
 }
