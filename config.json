@@ -1,9 +1,5 @@
 {
   "log": {"loglevel": "none"},
-  "dns": {
-    "servers": ["8.8.8.8", "1.1.1.1"],
-    "queryStrategy": "UseIPv4"
-  },
   "inbounds": [
     {
       "port": 10000,
@@ -16,26 +12,15 @@
       },
       "streamSettings": {
         "network": "ws",
-        "wsSettings": {"path": "/saeka-vless"},
-        "sockopt": {
-          "tcpFastOpen": true,
-          "tcpNoDelay": true,
-          "tcpKeepAliveInterval": 30
-        }
+        "wsSettings": {"path": "/saeka-vless"}
       },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": ["http", "tls", "fakedns"]
-      }
+      "sniffing": {"enabled": true, "destOverride": ["http", "tls"]}
     }
   ],
   "outbounds": [
     {
       "protocol": "freedom",
-      "tag": "direct",
-      "settings": {
-        "domainStrategy": "AsIs"
-      }
+      "tag": "direct"
     }
   ]
 }
