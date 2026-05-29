@@ -10,5 +10,5 @@ COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 EXPOSE 8080
 
 CMD /usr/local/bin/xray run -c /etc/xray.json & \
-    while ! nc -z 127.0.0.1 10001; do sleep 0.1; done && \
+    while ! nc -z 127.0.0.1 10000; do sleep 0.1; done && \
     /usr/local/openresty/bin/openresty -g 'daemon off;'
