@@ -47,9 +47,17 @@ case "$PAIR_CHOICE" in
 esac
 
 echo ""
+loading "BUILDING IMAGE"
+gcloud builds submit --tag "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" . --quiet > build.log 2>&1
+if [ $? -ne 0 ]; then
+    echo -e "  ${RED}BUILD FAILED${RESET}"
+    tail -n 10 build.log
+    exit 1
+fi
+
 loading "DEPLOYING TO CLOUD RUN"
 gcloud run deploy "$SERVICE_NAME" \
-  --source . \
+  --image "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" \
   --platform managed \
   --region us-central1 \
   --cpu "$CPU" \
