@@ -2,13 +2,7 @@
   "log": {"loglevel": "none"},
   "dns": {
     "servers": ["8.8.8.8", "1.1.1.1"],
-    "queryStrategy": "UseIPv4",
-    "disableCache": false,
-    "disableFallback": true,
-    "hosts": {
-      "domain:googleapis.com": "googleapis.com",
-      "domain:google.com": "google.com"
-    }
+    "queryStrategy": "UseIPv4"
   },
   "inbounds": [
     {
@@ -29,7 +23,10 @@
           "tcpKeepAliveInterval": 30
         }
       },
-      "sniffing": {"enabled": true, "destOverride": ["http", "tls"]}
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "fakedns"]
+      }
     }
   ],
   "outbounds": [
@@ -37,25 +34,8 @@
       "protocol": "freedom",
       "tag": "direct",
       "settings": {
-        "domainStrategy": "UseIPv4"
-      },
-      "streamSettings": {
-        "sockopt": {
-          "tcpFastOpen": true,
-          "tcpNoDelay": true,
-          "tcpKeepAliveInterval": 30
-        }
+        "domainStrategy": "AsIs"
       }
     }
-  ],
-  "routing": {
-    "domainStrategy": "IPIfNonMatch",
-    "rules": [
-      {
-        "type": "field",
-        "inboundTag": ["vless"],
-        "outboundTag": "direct"
-      }
-    ]
-  }
+  ]
 }
