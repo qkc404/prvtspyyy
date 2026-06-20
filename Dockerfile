@@ -16,11 +16,12 @@ RUN wget -qO /usr/local/bin/geosite.dat https://github.com/Loyalsoldier/v2ray-ru
 # CRITICAL FIX: Explicitly declare asset paths so Xray core reads the ad-block files flawlessly
 ENV XRAY_LOCATION_ASSET=/usr/local/bin
 
-# Copy configuration files
+# Copy configuration files and UI
 COPY config.json /etc/xray.json
 COPY haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
+COPY index.html /usr/local/etc/haproxy/index.html
 
 EXPOSE 8080
 
-# Starts xray immediately in background, then hands over foreground thread control to HAProxy
-CMD /usr/local/bin/xray run -c /etc/xray.json & exec haproxy -f /usr/local/etc/haproxy/haproxy.cfg
+# Run Xray in the background, but force HAProxy to the foreground (-db) to keep the container alive
+CMD /usr/local/bin/xray run -c /etc/xray.json & exec haproxy -db -f /usr/local/etc/haproxy/haproxy.cfg
