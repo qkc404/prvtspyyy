@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # ==========================================
-# ADVANCED 404 NOT FOUND DEPLOYER - GCP NATIVE
+# ADVANCED 404 NOT FOUND DEPLOYER
 # ==========================================
 
+# ANSI Color & Formatting Variables
 BOLD='\033[1m'
 RESET='\033[0m'
 GREEN='\033[1;32m'
@@ -14,16 +15,19 @@ MAGENTA='\033[1;35m'
 WHITE='\033[1;37m'
 GRAY='\033[1;30m'
 
+# Clear screen for a clean start
 clear
 
 echo ""
 echo -e "  ${BOLD}${WHITE}╭────────────────────────────────────────╮${RESET}"
-echo -e "  ${BOLD}${WHITE}│        PRVTSPYYY DEPLOYER (GEN 2)      │${RESET}"
+echo -e "  ${BOLD}${WHITE}│              PRVTSPYYY DEPLOYER               │${RESET}"
 echo -e "  ${BOLD}${WHITE}╰────────────────────────────────────────╯${RESET}"
 echo -e "   ${MAGENTA}  DEVELOPED BY SAEKA TOJIRP${RESET}"
 echo -e "   ${GREEN}  fb.com/saekacutiee${RESET}"
 echo ""
 
+# --- System Initialization ---
+# Retrieve the active Google Cloud Project ID
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null | tr -d '[:space:]')
 if [ -z "$PROJECT_ID" ]; then
     echo -e "  ${RED}✖ ERROR: No active GCP project found.${RESET}"
@@ -33,6 +37,7 @@ fi
 echo -e "  ${CYAN}[INIT]${RESET} ACTIVE PROJECT : ${GREEN}${PROJECT_ID}${RESET}"
 echo ""
 
+# --- User Inputs ---
 read -r -p "$(echo -e "  ${CYAN}➜ Enter Service Name [default: saeka]: ${RESET}")" INPUT_NAME
 SERVICE_NAME=${INPUT_NAME:-saeka}
 
@@ -56,6 +61,7 @@ echo ""
 echo -e "  ${CYAN}➜ SELECTED PROFILE: ${GREEN}${MODE} (${CPU} vCPU / ${RAM})${RESET}"
 echo ""
 
+# --- Smooth Spinner Function ---
 spinner() {
     local pid=$1
     local delay=0.1
@@ -70,6 +76,7 @@ spinner() {
     printf "  ${GREEN}[SUCCESS] ✔  %s${RESET}\n" "$2"
 }
 
+# --- Build Stage ---
 echo -e "  ${MAGENTA}▶ STAGE 1: COMPILING CONTAINER IMAGE${RESET}"
 gcloud builds submit --tag "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" --project="$PROJECT_ID" --quiet > build.log 2>&1 &
 BUILD_PID=$!
@@ -84,7 +91,8 @@ fi
 
 echo ""
 
-echo -e "  ${MAGENTA}▶ STAGE 2: DEPLOYING TO CLOUD RUN (GEN 2)${RESET}"
+# --- Deployment Stage ---
+echo -e "  ${MAGENTA}▶ STAGE 2: DEPLOYING TO CLOUD RUN${RESET}"
 gcloud run deploy "$SERVICE_NAME" \
   --image "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" \
   --platform managed --region us-central1 \
@@ -102,19 +110,21 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# --- Post-Deployment Extraction ---
+# Grab the generated URL from Cloud Run (keeping the full https:// link intact)
 SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --region us-central1 --project="$PROJECT_ID" --format='value(status.url)' 2>/dev/null)
-CLEAN_HOST=$(echo "$SERVICE_URL" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
+# --- Final Summary Screen ---
 echo ""
 echo -e "  ${BOLD}${GREEN}╭────────────────────────────────────────╮${RESET}"
 echo -e "  ${BOLD}${GREEN}│      DEPLOYMENT FULLY SUCCESSFUL       │${RESET}"
 echo -e "  ${BOLD}${GREEN}╰────────────────────────────────────────╯${RESET}"
 echo ""
-echo -e "  ${CYAN}▶ URL/HOST  : ${GREEN}${CLEAN_HOST}${RESET}"
+# FIXED: Replaced ${CLEAN_HOST} with ${SERVICE_URL} to keep it clickable
+echo -e "  ${CYAN}▶ URL/HOST  : ${GREEN}${SERVICE_URL}${RESET}"
 echo -e "  ${CYAN}▶ PORT      : ${GREEN}443${RESET}"
 echo -e "  ${CYAN}▶ PASSWORD  : ${GREEN}saeka${RESET}"
 echo -e "  ${CYAN}▶ PROTOCOLS : ${GREEN}VLESS / VMESS / TROJAN / SS${RESET}"
-echo -e "  ${CYAN}▶ TRANSPORTS: ${GREEN}WS / HTTPUpgrade / XHTTP${RESET}"
 echo ""
 echo -e "  ${CYAN}▶ PROFILE   : ${YELLOW}${MODE}${RESET}"
 echo -e "  ${CYAN}▶ RESOURCES : ${YELLOW}${CPU} vCPU / ${RAM} RAM${RESET}"
