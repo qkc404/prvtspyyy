@@ -9,13 +9,6 @@ RUN wget -qO /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/dow
     unzip -j /tmp/xray.zip xray -d /usr/local/bin/ && \
     chmod +x /usr/local/bin/xray && rm -rf /tmp/xray.zip
 
-# Inject Ultra-Aggressive Adblocking & Tracking Geo-databases
-RUN wget -qO /usr/local/bin/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat && \
-    wget -qO /usr/local/bin/geoip.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
-
-# CRITICAL FIX: Explicitly declare asset paths so Xray core reads the ad-block files flawlessly
-ENV XRAY_LOCATION_ASSET=/usr/local/bin
-
 # Copy configuration files and UI
 COPY config.json /etc/xray.json
 COPY haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
