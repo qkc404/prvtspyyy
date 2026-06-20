@@ -88,7 +88,6 @@ echo -e "  ${MAGENTA}▶ STAGE 2: DEPLOYING TO CLOUD RUN (GEN 2)${RESET}"
 gcloud run deploy "$SERVICE_NAME" \
   --image "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" \
   --platform managed --region us-central1 \
-  --execution-environment gen2 \
   --cpu "$CPU" --memory "$RAM" --port 8080 \
   --concurrency 1000 --cpu-boost --no-cpu-throttling \
   --timeout 3600 --min-instances 1 --max-instances "$MAX_INSTANCES" \
