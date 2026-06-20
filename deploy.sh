@@ -51,10 +51,10 @@ echo ""
 read -r -p "$(echo -e "  ${CYAN}➜ CHOICE [default: 4]: ${RESET}")" MODE_CHOICE
 
 case "$MODE_CHOICE" in
-    1) CPU="1"; RAM="2Gi"; MODE="BROWSING"; MAX_INSTANCES="1";;
-    2) CPU="2"; RAM="4Gi"; MODE="STREAMING"; MAX_INSTANCES="1";;
-    3) CPU="4"; RAM="8Gi"; MODE="GAMING"; MAX_INSTANCES="1";;
-    *) CPU="8"; RAM="16Gi"; MODE="ULTRA"; MAX_INSTANCES="1";;
+    1) CPU="1"; RAM="2Gi"; MODE="BROWSING"; MAX_INSTANCES="4";;
+    2) CPU="2"; RAM="4Gi"; MODE="STREAMING"; MAX_INSTANCES="4";;
+    3) CPU="4"; RAM="8Gi"; MODE="GAMING"; MAX_INSTANCES="4";;
+    *) CPU="8"; RAM="16Gi"; MODE="ULTRA"; MAX_INSTANCES="2";;
 esac
 
 echo ""
