@@ -20,10 +20,10 @@ clear
 
 echo ""
 echo -e "  ${BOLD}${WHITE}╭────────────────────────────────────────╮${RESET}"
-echo -e "  ${BOLD}${WHITE}│        404 NOT FOUND DEPLOYER        │${RESET}"
+echo -e "  ${BOLD}${WHITE}│              PRVTSPYYY DEPLOYER               │${RESET}"
 echo -e "  ${BOLD}${WHITE}╰────────────────────────────────────────╯${RESET}"
-echo -e "  ${MAGENTA}  DEVELOPED BY SAEKA TOJIRP${RESET}"
-echo -e "  ${GREEN}  fb.com/saekacutiee${RESET}"
+echo -e "   ${MAGENTA}  DEVELOPED BY SAEKA TOJIRP${RESET}"
+echo -e "   ${GREEN}  fb.com/saekacutiee${RESET}"
 echo ""
 
 # --- System Initialization ---
@@ -38,8 +38,8 @@ echo -e "  ${CYAN}[INIT]${RESET} ACTIVE PROJECT : ${GREEN}${PROJECT_ID}${RESET}"
 echo ""
 
 # --- User Inputs ---
-read -r -p "$(echo -e "  ${CYAN}➜ Enter Service Name [default: saeka-node]: ${RESET}")" INPUT_NAME
-SERVICE_NAME=${INPUT_NAME:-saeka-node}
+read -r -p "$(echo -e "  ${CYAN}➜ Enter Service Name [default: saeka]: ${RESET}")" INPUT_NAME
+SERVICE_NAME=${INPUT_NAME:-saeka}
 
 echo ""
 echo -e "  ${CYAN}➜ SELECT HARDWARE PROFILE:${RESET}"
@@ -62,7 +62,6 @@ echo -e "  ${CYAN}➜ SELECTED PROFILE: ${GREEN}${MODE} (${CPU} vCPU / ${RAM})${
 echo ""
 
 # --- Smooth Spinner Function ---
-# This runs a background process to animate the spinner while the main command executes
 spinner() {
     local pid=$1
     local delay=0.1
@@ -79,12 +78,10 @@ spinner() {
 
 # --- Build Stage ---
 echo -e "  ${MAGENTA}▶ STAGE 1: COMPILING CONTAINER IMAGE${RESET}"
-# Run build process in background and capture logs
 gcloud builds submit --tag "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" --project="$PROJECT_ID" --quiet > build.log 2>&1 &
 BUILD_PID=$!
 spinner $BUILD_PID "Building to gcr.io/${PROJECT_ID}/${SERVICE_NAME}..."
 
-# Check build success status
 wait $BUILD_PID
 if [ $? -ne 0 ]; then 
     echo -e "  ${RED}✖ BUILD FAILED. Printing recent logs:${RESET}"
@@ -96,7 +93,6 @@ echo ""
 
 # --- Deployment Stage ---
 echo -e "  ${MAGENTA}▶ STAGE 2: DEPLOYING TO CLOUD RUN${RESET}"
-# Run deploy process in background and capture logs
 gcloud run deploy "$SERVICE_NAME" \
   --image "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" \
   --platform managed --region us-central1 \
@@ -107,7 +103,6 @@ gcloud run deploy "$SERVICE_NAME" \
 DEPLOY_PID=$!
 spinner $DEPLOY_PID "Deploying service ${SERVICE_NAME} to us-central1..."
 
-# Check deploy success status
 wait $DEPLOY_PID
 if [ $? -ne 0 ]; then 
     echo -e "  ${RED}✖ DEPLOYMENT FAILED. Printing recent logs:${RESET}"
@@ -116,9 +111,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # --- Post-Deployment Extraction ---
-# Grab the generated URL from Cloud Run
+# Grab the generated URL from Cloud Run (keeping the full https:// link intact)
 SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --region us-central1 --project="$PROJECT_ID" --format='value(status.url)' 2>/dev/null)
-CLEAN_HOST=$(echo "$SERVICE_URL" | sed 's|https://||')
 
 # --- Final Summary Screen ---
 echo ""
@@ -126,7 +120,8 @@ echo -e "  ${BOLD}${GREEN}╭─────────────────
 echo -e "  ${BOLD}${GREEN}│      DEPLOYMENT FULLY SUCCESSFUL       │${RESET}"
 echo -e "  ${BOLD}${GREEN}╰────────────────────────────────────────╯${RESET}"
 echo ""
-echo -e "  ${CYAN}▶ HOST/SNI  : ${GREEN}${CLEAN_HOST}${RESET}"
+# FIXED: Replaced ${CLEAN_HOST} with ${SERVICE_URL} to keep it clickable
+echo -e "  ${CYAN}▶ URL/HOST  : ${GREEN}${SERVICE_URL}${RESET}"
 echo -e "  ${CYAN}▶ PORT      : ${GREEN}443${RESET}"
 echo -e "  ${CYAN}▶ PASSWORD  : ${GREEN}saeka${RESET}"
 echo -e "  ${CYAN}▶ PROTOCOLS : ${GREEN}VLESS / VMESS / TROJAN / SS${RESET}"
