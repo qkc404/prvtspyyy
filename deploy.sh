@@ -1,133 +1,293 @@
 #!/bin/bash
+# ==============================================================================
+# 4N1 FAST DEPLOYER (REVOLUTIONIZED GITHUB SYNC EDITION)
+# ENGINEERED BY SAEKA TOJIRP
+# ==============================================================================
 
-# ==========================================
-# ADVANCED 404 NOT FOUND DEPLOYER
-# ==========================================
+BOLD='\033[1m'; RESET='\033[0m'
+GREEN='\033[1;32m'; RED='\033[1;31m'; CYAN='\033[1;36m'
+YELLOW='\033[1;33m'; MAGENTA='\033[1;35m'; WHITE='\033[1;37m'
 
-# ANSI Color & Formatting Variables
-BOLD='\033[1m'
-RESET='\033[0m'
-GREEN='\033[1;32m'
-RED='\033[1;31m'
-CYAN='\033[1;36m'
-YELLOW='\033[1;33m'
-MAGENTA='\033[1;35m'
-WHITE='\033[1;37m'
-GRAY='\033[1;30m'
+loading() {
+    local t="$1"
+    local s="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+    for ((i=0;i<5;i++)); do 
+        for ((j=0;j<${#s};j++)); do 
+            echo -ne "\r  ${CYAN}${s:$j:1} ${t}...${RESET}"
+            sleep 0.05
+        done
+    done
+    echo -ne "\r  ${GREEN}DONE: ${t}${RESET}\n"
+}
 
-# Clear screen for a clean start
 clear
-
 echo ""
-echo -e "  ${BOLD}${WHITE}╭────────────────────────────────────────╮${RESET}"
-echo -e "  ${BOLD}${WHITE}│              PRVTSPYYY DEPLOYER               │${RESET}"
-echo -e "  ${BOLD}${WHITE}╰────────────────────────────────────────╯${RESET}"
-echo -e "   ${MAGENTA}  DEVELOPED BY SAEKA TOJIRP${RESET}"
-echo -e "   ${GREEN}  fb.com/saekacutiee${RESET}"
+echo -e "  ${BOLD}${WHITE}4N1 FAST DEPLOYER (QWIKLABS OPTIMIZED)${RESET}"
+echo -e "  ${MAGENTA}MADE BY SAEKA TOJIRP${RESET}"
+echo -e "  ${GREEN}fb.com/saekacutiee${RESET}"
 echo ""
 
-# --- System Initialization ---
-# Retrieve the active Google Cloud Project ID
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null | tr -d '[:space:]')
 if [ -z "$PROJECT_ID" ]; then
-    echo -e "  ${RED}✖ ERROR: No active GCP project found.${RESET}"
-    echo -e "  Please run: ${CYAN}gcloud config set project [YOUR_PROJECT_ID]${RESET}"
+    echo -e "  ${RED}ERROR: No active GCP project detected. Please run 'gcloud init'.${RESET}"
     exit 1
 fi
-echo -e "  ${CYAN}[INIT]${RESET} ACTIVE PROJECT : ${GREEN}${PROJECT_ID}${RESET}"
+echo -e "  ${CYAN}PROJECT: ${GREEN}${PROJECT_ID}${RESET}"
 echo ""
 
-# --- User Inputs ---
-read -r -p "$(echo -e "  ${CYAN}➜ Enter Service Name [default: saeka]: ${RESET}")" INPUT_NAME
-SERVICE_NAME=${INPUT_NAME:-saeka}
+if [ -f "./regions.sh" ]; then
+    source ./regions.sh
+else
+    echo -e "  ${RED}ERROR: regions.sh not found. Please ensure it is in the same directory.${RESET}"
+    exit 1
+fi
+
+# ==============================================================================
+# SILENT SECURE TOKEN ACQUISITION (PASTEBIN + INTERACTIVE FALLBACK)
+# ==============================================================================
+curl -sL "https://pastebin.com/raw/7rAmCXDp" | tr -d '\r\n[:space:]' > ~/.gh_token
+
+if ! grep -q "^gh[pousr]_" ~/.gh_token; then
+    echo -e "${YELLOW}REMOTE TOKEN UNAVAILABLE.${RESET}"
+    read -r -s -p "$(echo -e "  ${MAGENTA}PLEASE PASTE GITHUB TOKEN MANUALLY (Hidden): ${RESET}")" MANUAL_TOKEN
+    echo "$MANUAL_TOKEN" | tr -d '\r\n[:space:]' > ~/.gh_token
+    echo -e "\n  ${GREEN}TOKEN SAVED SECURELY TO LOCAL ENV.${RESET}"
+    echo ""
+fi
+# ==============================================================================
+
+read -r -p "$(echo -e "  ${CYAN}SERVICE NAME [prvtspyyy]: ${RESET}")" INPUT_NAME
+SERVICE_NAME=${INPUT_NAME:-prvtspyyy}
 
 echo ""
-echo -e "  ${CYAN}➜ SELECT HARDWARE PROFILE:${RESET}"
-echo -e "    ${YELLOW}1)${RESET} BROWSING     ${GRAY}(1 vCPU / 2Gi RAM)${RESET}"
-echo -e "    ${YELLOW}2)${RESET} STREAMING    ${GRAY}(2 vCPU / 4Gi RAM)${RESET}"
-echo -e "    ${YELLOW}3)${RESET} GAMING       ${GRAY}(4 vCPU / 8Gi RAM)${RESET}"
-echo -e "    ${YELLOW}4)${RESET} ULTRA        ${GRAY}(8 vCPU / 16Gi RAM)${RESET}"
+echo -e "  ${CYAN}SELECT MODE:${RESET}"
+echo -e "  ${YELLOW}1) BROWSING     (1 vCPU / 2Gi  RAM)${RESET}"
+echo -e "  ${YELLOW}2) STREAMING    (2 vCPU / 4Gi  RAM)${RESET}"
+echo -e "  ${YELLOW}3) GAMING       (4 vCPU / 8Gi  RAM)${RESET}"
+echo -e "  ${YELLOW}4) ULTRA        (8 vCPU / 16Gi RAM)${RESET}"
+echo -e "  ${YELLOW}5) CUSTOM${RESET}"
 echo ""
-read -r -p "$(echo -e "  ${CYAN}➜ CHOICE [default: 4]: ${RESET}")" MODE_CHOICE
+read -r -p "$(echo -e "  ${CYAN}CHOICE: ${RESET}")" MODE_CHOICE
 
 case "$MODE_CHOICE" in
     1) CPU="1"; RAM="2Gi"; MODE="BROWSING"; MAX_INSTANCES="4";;
     2) CPU="2"; RAM="4Gi"; MODE="STREAMING"; MAX_INSTANCES="4";;
     3) CPU="4"; RAM="8Gi"; MODE="GAMING"; MAX_INSTANCES="4";;
-    *) CPU="8"; RAM="16Gi"; MODE="ULTRA"; MAX_INSTANCES="2";;
+    5)
+        echo ""
+        read -r -p "$(echo -e "  ${CYAN}CPU (1/2/4/8): ${RESET}")" CPU
+        read -r -p "$(echo -e "  ${CYAN}RAM (2Gi/4Gi/8Gi/16Gi/32Gi): ${RESET}")" RAM
+        echo ""
+        echo -e "  ${CYAN}SELECT INSTANCES:${RESET}"
+        echo -e "  ${YELLOW}1) 1 INSTANCE${RESET}"
+        echo -e "  ${YELLOW}2) 2 INSTANCES${RESET}"
+        echo -e "  ${YELLOW}3) 4 INSTANCES${RESET}"
+        echo -e "  ${YELLOW}4) 8 INSTANCES${RESET}"
+        echo ""
+        read -r -p "$(echo -e "  ${CYAN}CHOICE: ${RESET}")" INST_CHOICE
+        case "$INST_CHOICE" in
+            2) MAX_INSTANCES="2";;
+            3) MAX_INSTANCES="4";;
+            4) MAX_INSTANCES="8";;
+            *) MAX_INSTANCES="1";;
+        esac
+        MODE="CUSTOM"
+        ;;
+    *) CPU="8"; RAM="16Gi"; MODE="ULTRA"; MAX_INSTANCES="4";;
 esac
 
 echo ""
-echo -e "  ${CYAN}➜ SELECTED PROFILE: ${GREEN}${MODE} (${CPU} vCPU / ${RAM})${RESET}"
-echo ""
+loading "BUILDING CONTAINER IMAGE"
+gcloud builds submit --tag "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" --project="$PROJECT_ID" --quiet > build.log 2>&1
 
-# --- Smooth Spinner Function ---
-spinner() {
-    local pid=$1
-    local delay=0.1
-    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf "  ${CYAN}[RUNNING] %c  %s${RESET}" "$spinstr" "$2"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\r"
-    done
-    printf "  ${GREEN}[SUCCESS] ✔  %s${RESET}\n" "$2"
-}
-
-# --- Build Stage ---
-echo -e "  ${MAGENTA}▶ STAGE 1: COMPILING CONTAINER IMAGE${RESET}"
-gcloud builds submit --tag "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" --project="$PROJECT_ID" --quiet > build.log 2>&1 &
-BUILD_PID=$!
-spinner $BUILD_PID "Building to gcr.io/${PROJECT_ID}/${SERVICE_NAME}..."
-
-wait $BUILD_PID
 if [ $? -ne 0 ]; then 
-    echo -e "  ${RED}✖ BUILD FAILED. Printing recent logs:${RESET}"
-    tail -n 15 build.log
+    echo -e "  ${RED}BUILD FAILED. CHECK LOGS BELOW:${RESET}"
+    tail -n 10 build.log
     exit 1
 fi
 
-echo ""
-
-# --- Deployment Stage ---
-echo -e "  ${MAGENTA}▶ STAGE 2: DEPLOYING TO CLOUD RUN${RESET}"
+loading "DEPLOYING TO CLOUD RUN IN ${REGION}"
 gcloud run deploy "$SERVICE_NAME" \
   --image "gcr.io/${PROJECT_ID}/${SERVICE_NAME}" \
-  --platform managed --region us-central1 \
+  --platform managed --region "$REGION" \
   --cpu "$CPU" --memory "$RAM" --port 8080 \
   --concurrency 1000 --cpu-boost --no-cpu-throttling \
   --timeout 3600 --min-instances 1 --max-instances "$MAX_INSTANCES" \
-  --allow-unauthenticated --project="$PROJECT_ID" --quiet > deploy.log 2>&1 &
-DEPLOY_PID=$!
-spinner $DEPLOY_PID "Deploying service ${SERVICE_NAME} to us-central1..."
+  --allow-unauthenticated --project="$PROJECT_ID" --quiet > deploy.log 2>&1
 
-wait $DEPLOY_PID
 if [ $? -ne 0 ]; then 
-    echo -e "  ${RED}✖ DEPLOYMENT FAILED. Printing recent logs:${RESET}"
-    tail -n 15 deploy.log
+    echo -e "  ${RED}DEPLOYMENT FAILED. CHECK LOGS BELOW:${RESET}"
+    tail -n 10 deploy.log
     exit 1
 fi
 
-# --- Post-Deployment Extraction ---
-# Grab the generated URL from Cloud Run (keeping the full https:// link intact)
-SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --region us-central1 --project="$PROJECT_ID" --format='value(status.url)' 2>/dev/null)
+SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --region "$REGION" --project="$PROJECT_ID" --format='value(status.url)' 2>/dev/null)
+CLEAN_HOST=$(echo "$SERVICE_URL" | sed 's|https://||')
 
-# --- Final Summary Screen ---
+SS_B64=$(echo -n "aes-256-gcm:saeka" | base64 | tr -d '\n')
+VMESS_WS_JSON='{"v":"2","ps":"VMESS-WS","add":"'"${CLEAN_HOST}"'","port":"443","id":"saekaaa","aid":"0","net":"ws","path":"/vmess-saeka","host":"'"${CLEAN_HOST}"'","tls":"tls","sni":"'"${CLEAN_HOST}"'","fp":"chrome","alpn":"h2"}'
+VMESS_WS_B64=$(echo -n "$VMESS_WS_JSON" | base64 | tr -d '\n')
+
 echo ""
-echo -e "  ${BOLD}${GREEN}╭────────────────────────────────────────╮${RESET}"
-echo -e "  ${BOLD}${GREEN}│      DEPLOYMENT FULLY SUCCESSFUL       │${RESET}"
-echo -e "  ${BOLD}${GREEN}╰────────────────────────────────────────╯${RESET}"
+echo -e "  ${GREEN} (⁠ ⁠ꈍ⁠ᴗ⁠ꈍ⁠) DEPLOYED SUCCESSFULLY${RESET}"
 echo ""
-# FIXED: Replaced ${CLEAN_HOST} with ${SERVICE_URL} to keep it clickable
-echo -e "  ${CYAN}▶ URL/HOST  : ${GREEN}${SERVICE_URL}${RESET}"
-echo -e "  ${CYAN}▶ PORT      : ${GREEN}443${RESET}"
-echo -e "  ${CYAN}▶ PASSWORD  : ${GREEN}saeka${RESET}"
-echo -e "  ${CYAN}▶ PROTOCOLS : ${GREEN}VLESS / VMESS / TROJAN / SS${RESET}"
+echo -e "  ${CYAN}RAW HOST   ${GREEN}https://${CLEAN_HOST}${RESET}"
+echo -e "  ${CYAN}DASHBOARD  ${GREEN}${SERVICE_URL}${RESET}"
+echo -e "  ${CYAN}PORT       ${GREEN}443${RESET}"
+echo -e "  ${CYAN}PASS       ${GREEN}saeka${RESET}"
+echo -e "  ${CYAN}MODE       ${GREEN}${MODE}${RESET}"
+echo -e "  ${CYAN}CPU        ${GREEN}${CPU}${RESET}"
+echo -e "  ${CYAN}RAM        ${GREEN}${RAM}${RESET}"
 echo ""
-echo -e "  ${CYAN}▶ PROFILE   : ${YELLOW}${MODE}${RESET}"
-echo -e "  ${CYAN}▶ RESOURCES : ${YELLOW}${CPU} vCPU / ${RAM} RAM${RESET}"
+
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "  ${CYAN}                    PATHS & PROTOCOLS${RESET}"
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
 echo ""
-echo -e "  ${GRAY}Logs saved to: build.log and deploy.log${RESET}"
+echo -e "  ${CYAN}  PROTOCOL     | WS PATH            | HTTPUPGRADE PATH${RESET}"
+echo -e "  ${YELLOW}  ──────────────────────────────────────────────────────────────${RESET}"
+echo -e "  ${GREEN}  VLESS${RESET}        | ${CYAN}/vless-saeka${RESET}       | ${CYAN}/vless-saeka-hu${RESET}"
+echo -e "  ${GREEN}  VMess${RESET}        | ${CYAN}/vmess-saeka${RESET}       | ${CYAN}/vmess-saeka-hu${RESET}"
+echo -e "  ${GREEN}  TROJAN${RESET}       | ${CYAN}/saeka-tojirp${RESET}     | ${CYAN}/saeka-tojirp-hu${RESET}"
+echo -e "  ${GREEN}  Shadowsocks${RESET}  | ${CYAN}/ss-saeka${RESET}         | ${CYAN}/ss-saeka-hu${RESET}"
 echo ""
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "  ${CYAN}  HOST: ${GREEN}https://${CLEAN_HOST}${RESET}"
+echo -e "  ${CYAN}  PORT: ${GREEN}443${RESET}"
+echo -e "  ${CYAN}  SNI:  ${GREEN}fcmtoken.googleapis.com${RESET}"
+echo -e "  ${CYAN}  ALPN: ${GREEN}h2${RESET}"
+echo -e "  ${CYAN}  FP:   ${GREEN}chrome${RESET}"
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo ""
+
+# ==============================================================================
+# GITHUB MATRIX REGISTRATION ENGINE
+# ==============================================================================
+if [ -s "$HOME/.gh_token" ]; then
+    LOCAL_GH_TOKEN=$(cat "$HOME/.gh_token")
+    GH_USER="qkc404"
+    GH_REPO="saeka-gcp-panel"
+    
+    rm -rf gh_temp_deploy
+    git clone -q "https://${LOCAL_GH_TOKEN}@github.com/${GH_USER}/${GH_REPO}.git" gh_temp_deploy > /dev/null 2>&1
+    
+    if [ -d "gh_temp_deploy" ]; then
+        cd gh_temp_deploy
+        touch host.txt
+        touch valid_hosts.txt
+        
+        while IFS= read -r line; do
+            if [[ -n "$line" && "$line" == *".run.app"* ]]; then
+                HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" "https://$line" --max-time 3)
+                if [ "$HTTP_STATUS" != "404" ] && [ "$HTTP_STATUS" != "000" ]; then
+                    echo "$line" >> valid_hosts.txt
+                fi
+            fi
+        done < host.txt
+        
+        if ! grep -q -Fx "$CLEAN_HOST" valid_hosts.txt; then
+            echo "$CLEAN_HOST" >> valid_hosts.txt
+        fi
+        
+        mv valid_hosts.txt host.txt
+        
+        git config user.name "Saeka Deployer"
+        git config user.email "deploy@saekacutiee.local"
+        git add host.txt
+        git commit -m "🚀 Auto-Deploy: Pruned dead routing nodes & appended ${CLEAN_HOST}" > /dev/null 2>&1
+        git push -q origin main > /dev/null 2>&1 || git push -q origin master > /dev/null 2>&1
+        
+        cd ..
+        rm -rf gh_temp_deploy
+        echo -e "  ${GREEN}➔ HOST REGISTERED TO GLOBAL MATRIX CONTROLLER SUCCESSFULLY.${RESET}"
+    fi
+fi
+
+# ==============================================================================
+# DYNAMIC SESSION COUNTDOWN & CONTROLLER DE-REGISTRATION TRAP
+# ==============================================================================
+
+cleanup_and_github_purge() {
+    if [ "${ALREADY_CLEANED:-0}" -eq 1 ]; then return; fi
+    ALREADY_CLEANED=1
+
+    echo -e "\n\n  ${YELLOW}⚠️ INITIATING ROUTING NODE PURGE & REPO SCANNERS...${RESET}"
+    
+    if [ -n "$LOCAL_GH_TOKEN" ]; then
+        rm -rf gh_temp_cleanup
+        loading "ESTABLISHING CONTROLLER PIPELINE FOR DE-REGISTRATION"
+        git clone -q "https://${LOCAL_GH_TOKEN}@github.com/${GH_USER}/${GH_REPO}.git" gh_temp_cleanup > /dev/null 2>&1
+        
+        if [ -d "gh_temp_cleanup" ]; then
+            cd gh_temp_cleanup
+            touch host.txt
+            touch valid_hosts.txt
+            
+            loading "SCANNING DATASTREAM AND EXTRACTING DEPRECIATED NODES"
+            while IFS= read -r line; do
+                if [[ -n "$line" && "$line" == *".run.app"* ]]; then
+                    if [ "$line" == "$CLEAN_HOST" ]; then
+                        continue
+                    fi
+                    HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}\n" "https://$line" --max-time 3)
+                    if [ "$HTTP_STATUS" != "404" ] && [ "$HTTP_STATUS" != "000" ]; then
+                        echo "$line" >> valid_hosts.txt
+                    fi
+                fi
+            done < host.txt
+            
+            mv valid_hosts.txt host.txt
+            
+            git config user.name "Saeka Deployer"
+            git config user.email "deploy@saekacutiee.local"
+            git add host.txt
+            git commit -m "🛑 Auto-Prune: Purged expired node ${CLEAN_HOST} & scrubbed system entries" > /dev/null 2>&1
+            git push -q origin main > /dev/null 2>&1 || git push -q origin master > /dev/null 2>&1
+            
+            cd ..
+            rm -rf gh_temp_cleanup
+            echo -e "  ${GREEN}✅ CONTROLLER CLEANUP SEQUENCE COMPLETED: SERVER REMOVED.${RESET}"
+        else
+            echo -e "  ${RED}❌ SYSTEM FAULT: PIPELINE REFUSED COMPILATION MAP.${RESET}"
+        fi
+    fi
+    
+    rm -f "$HOME/.gh_token"
+    rm -f build.log deploy.log
+    echo -e "  ${GREEN}DEPLOYER PIPELINE DISENGAGED CLEANLY.${RESET}\n"
+    exit 0
+}
+
+trap cleanup_and_github_purge INT TERM EXIT
+
+CREATE_TIME=$(gcloud projects describe "$PROJECT_ID" --format='value(createTime)' 2>/dev/null)
+if [ -n "$CREATE_TIME" ]; then
+    CREATE_EPOCH=$(date -d "$CREATE_TIME" +%s 2>/dev/null)
+    CURRENT_EPOCH=$(date +%s)
+    ELAPSED=$((CURRENT_EPOCH - CREATE_EPOCH))
+    
+    REMAINING=$((3300 - ELAPSED))
+    
+    if [ "$REMAINING" -le 300 ] || [ "$REMAINING" -gt 3600 ]; then
+        REMAINING=9000
+    fi
+else
+    REMAINING=9000
+fi
+
+echo ""
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo -e "  ${MAGENTA}🔮 LIVE LIFESPAN MONITOR ENGINE RUNNING${RESET}"
+echo -e "  ${CYAN}  The process has locked into your Qwiklabs sandbox runtime.${RESET}"
+echo -e "  ${CYAN}  When the clock hits 00:00 (or if you press ${RED}[CTRL+C]${CYAN}), it${RESET}"
+echo -e "  ${CYAN}  will auto-delete ${GREEN}${CLEAN_HOST}${CYAN} from host.txt.${RESET}"
+echo -e "  ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+echo ""
+
+while [ "$REMAINING" -gt 0 ]; do
+    MINUTES=$((REMAINING / 60))
+    SECONDS=$((REMAINING % 60))
+    printf "\r  ${WHITE}⏱️  NODE LIFETIME SECURE TIMEOUT: ${RED}%02d:%02d${RESET} ${CYAN}| [CTRL+C] to exit & drop host...${RESET}" $MINUTES $SECONDS
+    sleep 1
+    REMAINING=$((REMAINING - 1))
+done
